@@ -49,4 +49,12 @@ public class Island {
     public void addAdjacentIsland(Island island) {
         AdjacentIslands.add(island);
     }
+
+    public boolean isComplete() {
+        return getBridgeNeeded() == getBridgeCount();
+    }
+
+    public void increaseBridgeCount() {
+        this.BridgeCount++;
+    }
 }
