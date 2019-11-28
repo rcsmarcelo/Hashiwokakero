@@ -28,13 +28,13 @@ public class DrawGraph extends JPanel {
         int shift = 40;
         DefaultEdge[] edges = Puzzle.edgeSet().toArray(new DefaultEdge[0]);
         ArrayList<DefaultEdge> visited = new ArrayList<>();
+        for (Island v : Puzzle.vertexSet())
+            g2d.fillOval((v.getCol() * 30 - 5) + shift, (v.getLine() * 30 - 5) + shift, 10, 10);
         for (int c = 0; c < edges.length; c++) {
             if (visited.contains(edges[c]));
             Island p1 = Puzzle.getEdgeSource(edges[c]);
             Island p2 = Puzzle.getEdgeTarget(edges[c]);
             visited.add(edges[c]);
-            g2d.fillOval((p1.getCol() * 30 - 5) + shift, (p1.getLine() * 30 - 5) + shift, 10, 10);
-            g2d.fillOval((p2.getCol() * 30 - 5) + shift, (p2.getLine() * 30 - 5) + shift, 10, 10);
             if (Puzzle.getAllEdges(p1, p2).size() == 2) {
                 Line2D edge = new Line2D.Float(p1.getCol() * 30 + 2 + shift, p1.getLine() * 30 + 2 + shift,
                         p2.getCol() * 30 + 2 + shift, p2.getLine() * 30 + 2 + shift);

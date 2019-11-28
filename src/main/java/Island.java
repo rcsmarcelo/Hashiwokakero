@@ -14,6 +14,25 @@ public class Island {
         this.BridgeNeeded = BridgeNeeded;
     }
 
+    public Island(Island isl) {
+        this.Line = isl.getLine();
+        this.Col = isl.getCol();
+        this.BridgeNeeded = isl.getBridgeNeeded();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        if (obj.getClass() != this.getClass()) return false;
+        if (obj == this) return true;
+        return (((Island)obj).getCol() == this.getCol() && ((Island)obj).getLine() == this.getLine());
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * (Integer.toString(this.getLine()) + Integer.toString(this.getCol())).hashCode();
+    }
+
     public int getLine() {
         return Line;
     }
