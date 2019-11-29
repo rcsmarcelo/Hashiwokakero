@@ -3,7 +3,7 @@ import java.util.ArrayList;
 public class Island {
     private int Line;
     private int Col;
-    private int BridgeCount = 0;
+    private int BridgeCount;
     private int BridgeNeeded;
 
     public ArrayList<Island> AdjacentIslands = new ArrayList<Island>();
@@ -12,12 +12,14 @@ public class Island {
         this.Line = Line;
         this.Col = Col;
         this.BridgeNeeded = BridgeNeeded;
+        this.BridgeCount = 0;
     }
 
     public Island(Island isl) {
         this.Line = isl.getLine();
         this.Col = isl.getCol();
         this.BridgeNeeded = isl.getBridgeNeeded();
+        this.BridgeCount = 0;
     }
 
     @Override
@@ -37,32 +39,16 @@ public class Island {
         return Line;
     }
 
-    public void setLine(int line) {
-        Line = line;
-    }
-
     public int getCol() {
         return Col;
-    }
-
-    public void setCol(int col) {
-        Col = col;
     }
 
     public int getBridgeCount() {
         return BridgeCount;
     }
 
-    public void setBridgeCount(int bridgeCount) {
-        BridgeCount = bridgeCount;
-    }
-
     public int getBridgeNeeded() {
         return BridgeNeeded;
-    }
-
-    public void setBridgeNeeded(int BridgeNeeded) {
-        BridgeNeeded = BridgeNeeded;
     }
 
     public void addAdjacentIsland(Island island) {
@@ -76,4 +62,8 @@ public class Island {
     public void increaseBridgeCount() {
         this.BridgeCount++;
     }
+
+    public ArrayList<Island> getAdjacentIslands() { return this.AdjacentIslands; }
+
+    public void decreaseBridgeCount() { this.BridgeCount--; }
 }

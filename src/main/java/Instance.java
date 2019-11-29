@@ -23,12 +23,11 @@ public class Instance {
             readInstance();
             createAuxStructures();
         }
-        printHashiMatrix();
         GenAlg.HGA(HashiMatrix, Population, Dimension, STARTING_POPULATION);
     }
 
     private static void readInstance() throws IOException {
-        File file = new File("C:\\Users\\ramos\\Downloads\\Hashi_Puzzles\\100\\" + Filename);
+        File file = new File("C:\\Users\\marcelo.costasantos\\Downloads\\Hashi_Puzzles\\100\\" + Filename);
         BufferedReader br = new BufferedReader(new FileReader(file));
         HashiPuzzle = new Multigraph<>(DefaultEdge.class);
         String line, splitline[];
@@ -56,22 +55,27 @@ public class Instance {
     private static void createAuxStructures() {
         for (int line = 0; line < Dimension; line++) {
             for (int col = 0; col < Dimension; col++) {
-                if (HashiMatrix.get(HashiMatrix.size() - 1).get(line).get(col).getBridgeNeeded() == 0) continue;
-                if (col - 1 >= 0 && HashiMatrix.get(HashiMatrix.size() - 1).get(line).get(col - 1).getBridgeNeeded() != 0)
-                    HashiMatrix.get(HashiMatrix.size() - 1).get(line).get(col).
-                            addAdjacentIsland(HashiMatrix.get(HashiMatrix.size() - 1).get(line).get(col - 1));
-                else if (col + 1 < Dimension && HashiMatrix.get(HashiMatrix.size() - 1).get(line).get(col + 1).
-                        getBridgeNeeded() != 0)
-                    HashiMatrix.get(HashiMatrix.size() - 1).get(line).get(col).
-                            addAdjacentIsland(HashiMatrix.get(HashiMatrix.size() - 1).get(line).get(col + 1));
-                if (line - 1 >= 0 && HashiMatrix.get(HashiMatrix.size() - 1).get(line - 1).get(col).
-                        getBridgeNeeded() != 0)
-                    HashiMatrix.get(HashiMatrix.size() - 1).get(line).get(col).
-                            addAdjacentIsland(HashiMatrix.get(HashiMatrix.size() - 1).get(line - 1).get(col));
-                else if (line + 1 < Dimension && HashiMatrix.get(HashiMatrix.size() - 1).get(line + 1).get(col).
-                        getBridgeNeeded() != 0)
-                    HashiMatrix.get(HashiMatrix.size() - 1).get(line).get(col).addAdjacentIsland(
-                            HashiMatrix.get(HashiMatrix.size() - 1).get(line + 1).get(col));
+                Island curr = HashiMatrix.get(HashiMatrix.size() - 1).get(line).get(col);
+                for (int col1 = col + 1; col1 < Dimension; col1++)
+                    if (HashiMatrix.get(HashiMatrix.size() - 1).get(line).get(col1).getBridgeNeeded() != 0) {
+                        curr.addAdjacentIsland(HashiMatrix.get(HashiMatrix.size() - 1).get(line).get(col1));
+                        break;
+                    }
+                for (int col1 = col - 1; col1 > 0; col1--)
+                    if (HashiMatrix.get(HashiMatrix.size() - 1).get(line).get(col1).getBridgeNeeded() != 0) {
+                        curr.addAdjacentIsland(HashiMatrix.get(HashiMatrix.size() - 1).get(line).get(col1));
+                        break;
+                    }
+                for (int line1 = line + 1; line1 < Dimension; line1++)
+                    if (HashiMatrix.get(HashiMatrix.size() - 1).get(line1).get(col).getBridgeNeeded() != 0) {
+                        curr.addAdjacentIsland(HashiMatrix.get(HashiMatrix.size() - 1).get(line1).get(col));
+                        break;
+                    }
+                for (int line1 = line - 1; line1 > 0; line1--)
+                    if (HashiMatrix.get(HashiMatrix.size() - 1).get(line1).get(col).getBridgeNeeded() != 0) {
+                        curr.addAdjacentIsland(HashiMatrix.get(HashiMatrix.size() - 1).get(line1).get(col));
+                        break;
+                    }
             }
         }
     }

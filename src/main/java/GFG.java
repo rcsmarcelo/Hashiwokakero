@@ -1,67 +1,211 @@
 // Java program to check if two given line segments intersect
 class GFG {
+    public static final double EPSILON = 0.000001;
+
     static class Point {
         int x;
         int y;
 
         public Point(int x, int y) {
-            this.x = x;
-            this.y = y;
+            this. x = x;
+            this. y = y;
         }
 
-    }
+        @Override
+        public String toString() {
+            return "(" + x + "|" + y + ")";
+        }
 
-    // Given three colinear points p, q, r, the function checks if
-    // point q lies on line segment 'pr'
-    static boolean onSegment(Point p, Point q, Point r) {
-        if (q.x <= Math.max(p.x, r.x) && q.x >= Math.min(p.x, r.x) &&
-                q.y <= Math.max(p.y, r.y) && q.y >= Math.min(p.y, r.y))
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            long temp;
+            temp = Double.doubleToLongBits(x);
+            result = prime * result + (int) (temp ^ (temp >>> 32));
+            temp = Double.doubleToLongBits(y);
+            result = prime * result + (int) (temp ^ (temp >>> 32));
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            Point other = (Point) obj;
+            if (Double.doubleToLongBits(x) != Double.doubleToLongBits(other.x))
+                return false;
+            if (Double.doubleToLongBits(y) != Double.doubleToLongBits(other.y))
+                return false;
             return true;
-
-        return false;
+        }
     }
 
-    // To find orientation of ordered triplet (p, q, r).
-    // The function returns following values
-    // 0 --> p, q and r are colinear
-    // 1 --> Clockwise
-    // 2 --> Counterclockwise
-    static int orientation(Point p, Point q, Point r) {
-        int val = (q.y - p.y) * (r.x - q.x) -
-                (q.x - p.x) * (r.y - q.y);
+    static class LineSegment {
+        Point first;
+        Point second;
+        String name;
 
-        if (val == 0) return 0; // colinear
+        public LineSegment (Point first, Point second) {
+            this.first = first;
+            this.second = second;
+            this.name = "LineSegment";
+        }
+        /**
+         * Get the bounding box of this line by two points. The first point is in
+         * the lower left corner, the second one at the upper right corner.
+         *
+         * @return the bounding box
+         */
+        public Point[] getBoundingBox() {
+            Point[] result = new Point[2];
+            result[0] = new Point(Math.min(first.x, second.x), Math.min(first.y,
+                    second.y));
+            result[1] = new Point(Math.max(first.x, second.x), Math.max(first.y,
+                    second.y));
+            return result;
+        }
 
-        return (val > 0) ? 1 : 2; // clock or counterclock wise
-    }
+        @Override
+        public String toString() {
+            if (name.equals("LineSegment")) {
+                return "LineSegment [" + first + " to " + second + "]";
+            } else {
+                return name;
+            }
+        }
 
-    // The main function that returns true if line segment 'p1q1'
-    // and 'p2q2' intersect.
-    static boolean doIntersect(Point p1, Point q1, Point p2, Point q2) {
-        // Find the four orientations needed for general and
-        // special cases
-        int o1 = orientation(p1, q1, p2);
-        int o2 = orientation(p1, q1, q2);
-        int o3 = orientation(p2, q2, p1);
-        int o4 = orientation(p2, q2, q1);
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((first == null) ? 0 : first.hashCode());
+            result = prime * result + ((name == null) ? 0 : name.hashCode());
+            result = prime * result + ((second == null) ? 0 : second.hashCode());
+            return result;
+        }
 
-        // General case
-        if (o1 != o2 && o3 != o4)
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            LineSegment other = (LineSegment) obj;
+            if (first == null) {
+                if (other.first != null)
+                    return false;
+            } else if (!first.equals(other.first))
+                return false;
+            if (name == null) {
+                if (other.name != null)
+                    return false;
+            } else if (!name.equals(other.name))
+                return false;
+            if (second == null) {
+                if (other.second != null)
+                    return false;
+            } else if (!second.equals(other.second))
+                return false;
             return true;
+        }
+    }
 
-        // Special Cases
-        // p1, q1 and p2 are colinear and p2 lies on segment p1q1
-        if (o1 == 0 && onSegment(p1, p2, q1)) return true;
+    /**
+     * Calculate the cross product of two points.
+     * @param a first point
+     * @param b second point
+     * @return the value of the cross product
+     */
+    public static double crossProduct(Point a, Point b) {
+        return a.x * b.y - b.x * a.y;
+    }
 
-        // p1, q1 and q2 are colinear and q2 lies on segment p1q1
-        if (o2 == 0 && onSegment(p1, q2, q1)) return true;
+    /**
+     * Check if bounding boxes do intersect. If one bounding box
+     * touches the other, they do intersect.
+     * @param a first bounding box
+     * @param b second bounding box
+     * @return <code>true</code> if they intersect,
+     *         <code>false</code> otherwise.
+     */
+    public static boolean doBoundingBoxesIntersect(Point[] a, Point[] b) {
+        return a[0].x <= b[1].x && a[1].x >= b[0].x && a[0].y <= b[1].y
+                && a[1].y >= b[0].y;
+    }
 
-        // p2, q2 and p1 are colinear and p1 lies on segment p2q2
-        if (o3 == 0 && onSegment(p2, p1, q2)) return true;
+    /**
+     * Checks if a Point is on a line
+     * @param a line (interpreted as line, although given as line
+     *                segment)
+     * @param b point
+     * @return <code>true</code> if point is on line, otherwise
+     *         <code>false</code>
+     */
+    public static boolean isPointOnLine(LineSegment a, Point b) {
+        // Move the image, so that a.first is on (0|0)
+        LineSegment aTmp = new LineSegment(new Point(0, 0), new Point(
+                a.second.x - a.first.x, a.second.y - a.first.y));
+        Point bTmp = new Point(b.x - a.first.x, b.y - a.first.y);
+        double r = crossProduct(aTmp.second, bTmp);
+        return Math.abs(r) < EPSILON;
+    }
 
-        // p2, q2 and q1 are colinear and q1 lies on segment p2q2
-        if (o4 == 0 && onSegment(p2, q1, q2)) return true;
+    /**
+     * Checks if a point is right of a line. If the point is on the
+     * line, it is not right of the line.
+     * @param a line segment interpreted as a line
+     * @param b the point
+     * @return <code>true</code> if the point is right of the line,
+     *         <code>false</code> otherwise
+     */
+    public static boolean isPointRightOfLine(LineSegment a, Point b) {
+        // Move the image, so that a.first is on (0|0)
+        LineSegment aTmp = new LineSegment(new Point(0, 0), new Point(
+                a.second.x - a.first.x, a.second.y - a.first.y));
+        Point bTmp = new Point(b.x - a.first.x, b.y - a.first.y);
+        return crossProduct(aTmp.second, bTmp) < 0;
+    }
 
-        return false; // Doesn't fall in any of the above cases
+    /**
+     * Check if line segment first touches or crosses the line that is
+     * defined by line segment second.
+     *
+     * @param a line segment interpreted as line
+     * @param b line segment
+     * @return <code>true</code> if line segment first touches or
+     *                           crosses line second,
+     *         <code>false</code> otherwise.
+     */
+    public static boolean lineSegmentTouchesOrCrossesLine(LineSegment a,
+                                                          LineSegment b) {
+        return isPointOnLine(a, b.first)
+                || isPointOnLine(a, b.second)
+                || (isPointRightOfLine(a, b.first) ^ isPointRightOfLine(a,
+                b.second));
+    }
+
+    /**
+     * Check if line segments intersect
+     * @param a first line segment
+     * @param b second line segment
+     * @return <code>true</code> if lines do intersect,
+     *         <code>false</code> otherwise
+     */
+    public static boolean doLinesIntersect(LineSegment a, LineSegment b) {
+        Point[] box1 = a.getBoundingBox();
+        Point[] box2 = b.getBoundingBox();
+        if (isPointOnLine(a, b.first) || isPointOnLine(a, b.second)
+                || isPointOnLine(b, a.first) || isPointOnLine(b, a.second))
+            return false;
+        return doBoundingBoxesIntersect(box1, box2)
+                && lineSegmentTouchesOrCrossesLine(a, b)
+                && lineSegmentTouchesOrCrossesLine(b, a);
     }
 }
