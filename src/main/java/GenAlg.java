@@ -115,6 +115,7 @@ public class GenAlg {
             for (DefaultEdge bridge1 : parent1.edgeSet()) {
                 Island isl = parent1.getEdgeSource(bridge1);
                 Island isl2 = parent1.getEdgeTarget(bridge1);
+                if (isl.isComplete() || isl2.isComplete()) continue;
                 if (isl.getLine() <= line && isl.getCol() <= col &&
                         isl2.getLine() <= line && isl2.getCol() <= col) {
                     child.addEdge(isl, isl2, new DefaultEdge());
@@ -123,6 +124,7 @@ public class GenAlg {
             for (DefaultEdge bridge : parent2.edgeSet()) {
                 Island isl = parent2.getEdgeSource(bridge);
                 Island isl2 = parent2.getEdgeTarget(bridge);
+                if (isl.isComplete() || isl2.isComplete()) continue;
                 if ((isl.getLine() > line && isl.getCol() > col || isl.getCol() > col
                         || isl.getLine() > line) && (isl2.getLine() > line && isl2.getCol() > col
                         || isl2.getCol() > col || isl2.getLine() > line)) {
