@@ -22,7 +22,7 @@ public class GenAlg {
         //initialize parents
         for (int c = 0; c < STARTING_POPULATION; c++)
             initializePopulation(c);
-        for (int c = 0; c < Dimension * 50; c++) {
+        for (int c = 0; c < Dimension * 100; c++) {
             selectParents();
             produceOffspring();
             improveOffspring();
@@ -37,17 +37,8 @@ public class GenAlg {
                 return 1;
             else return 0;
         }));
-        System.out.println(evaluateCandidate(Collections.min(Population, (t1, t2) -> {
-            int value1 = evaluateCandidate(t1);
-            int value2 = evaluateCandidate(t2);
-            if (value1 < value2)
-                return -1;
-            else if (value1 > value2)
-                return 1;
-            else return 0;
-        })));
-        for (Graph<Island, DefaultEdge> g : Population);
-           // System.out.println(evaluateCandidate(g));
+        for (Graph<Island, DefaultEdge> g : Population)
+           System.out.println(evaluateCandidate(g));
     }
 
     /*
@@ -56,19 +47,13 @@ public class GenAlg {
     */
     private static void initializePopulation(int index) {
         Island[] vertexes = Population.get(index).vertexSet().toArray(new Island[0]);
-        Collections.shuffle(Arrays.asList(vertexes));
         for (Island isl : vertexes) {
-            if(isl.isComplete()) continue;
+            if (isl.isComplete(Population.get(index))) continue;
             for (Island adj : isl.getAdjacentIslands()) {
-                if (adj.isComplete() || !canAddEdge(adj, isl, Population.get(index)) || isl == adj) continue;
-                Population.get(index).addEdge(isl, adj, new DefaultEdge());
-                isl.increaseBridgeCount();
-                adj.increaseBridgeCount();
-                if (!isl.isComplete() && !adj.isComplete() && canAddEdge(adj, isl, Population.get(index))) {
+                if (canAddEdge(adj, isl, Population.get(index)))
                     Population.get(index).addEdge(isl, adj, new DefaultEdge());
-                    isl.increaseBridgeCount();
-                    adj.increaseBridgeCount();
-                }
+                if (canAddEdge(adj, isl, Population.get(index)))
+                    Population.get(index).addEdge(isl, adj, new DefaultEdge());
             }
         }
     }
@@ -79,7 +64,7 @@ public class GenAlg {
     private static int evaluateCandidate(Graph<Island, DefaultEdge> g) {
         int fitness = 0;
         for (Island isl : g.vertexSet())
-            if (!isl.isComplete())
+            if (!isl.isComplete(g))
                 fitness++;
         return fitness;
     }
@@ -115,20 +100,20 @@ public class GenAlg {
             for (DefaultEdge bridge1 : parent1.edgeSet()) {
                 Island isl = parent1.getEdgeSource(bridge1);
                 Island isl2 = parent1.getEdgeTarget(bridge1);
-                if (isl.isComplete() || isl2.isComplete()) continue;
-                if (isl.getLine() <= line && isl.getCol() <= col &&
-                        isl2.getLine() <= line && isl2.getCol() <= col) {
-                    child.addEdge(isl, isl2, new DefaultEdge());
+                if (!isl.isComplete(parent1) && !isl2.isComplete(parent1)) {
+                    if (isl.getLine() <= line && isl.getCol() <= col &&
+                            isl2.getLine() <= line && isl2.getCol() <= col)
+                        child.addEdge(isl, isl2, new DefaultEdge());
                 }
             }
             for (DefaultEdge bridge : parent2.edgeSet()) {
                 Island isl = parent2.getEdgeSource(bridge);
                 Island isl2 = parent2.getEdgeTarget(bridge);
-                if (isl.isComplete() || isl2.isComplete()) continue;
-                if ((isl.getLine() > line && isl.getCol() > col || isl.getCol() > col
-                        || isl.getLine() > line) && (isl2.getLine() > line && isl2.getCol() > col
-                        || isl2.getCol() > col || isl2.getLine() > line)) {
-                    child.addEdge(isl, isl2, new DefaultEdge());
+                if (!isl.isComplete(parent2) && isl2.isComplete(parent2)) {
+                    if ((isl.getLine() > line && isl.getCol() > col || isl.getCol() > col
+                            || isl.getLine() > line) && (isl2.getLine() > line && isl2.getCol() > col
+                            || isl2.getCol() > col || isl2.getLine() > line))
+                        child.addEdge(isl, isl2, new DefaultEdge());
                 }
             }
             //attempt to connect the disjointed sub-graphs
@@ -154,6 +139,7 @@ public class GenAlg {
     Checks if it's possible to add an edge between p1 and p2
     */
     private static boolean canAddEdge(Island p1, Island p2, Graph<Island, DefaultEdge> puzzle) {
+        if (p1.isComplete(puzzle) || p2.isComplete(puzzle)) return false;
         for (DefaultEdge bridge : puzzle.edgeSet()) {
             Island p3 = puzzle.getEdgeSource(bridge);
             Island p4 = puzzle.getEdgeTarget(bridge);
@@ -177,8 +163,6 @@ public class GenAlg {
             for (Island isl2 : isl.getAdjacentIslands()) {
                 if (child.getAllEdges(isl, isl2).size() > 1) {
                     child.removeEdge(isl, isl2);
-                    isl.decreaseBridgeCount();
-                    isl2.decreaseBridgeCount();
                     aux = false;
                     break;
                 }
@@ -186,14 +170,11 @@ public class GenAlg {
             if (!aux) break;
         }
         for (Island isl : child.vertexSet()) {
-            if (isl.isComplete()) continue;
+            if (isl.isComplete(child)) continue;
             for (Island isl2 : isl.getAdjacentIslands()) {
-                if (isl2.isComplete()) continue;
-                if (canAddEdge(isl, isl2, child)) {
+                if (isl2.isComplete(child)) continue;
+                if (canAddEdge(isl, isl2, child))
                     child.addEdge(isl, isl2, new DefaultEdge());
-                    isl.increaseBridgeCount();
-                    isl2.increaseBridgeCount();
-                }
             }
         }
     }

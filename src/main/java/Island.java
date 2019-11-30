@@ -1,9 +1,11 @@
+import org.jgrapht.Graph;
+import org.jgrapht.graph.DefaultEdge;
+
 import java.util.ArrayList;
 
 public class Island {
     private int Line;
     private int Col;
-    private int BridgeCount;
     private int BridgeNeeded;
 
     public ArrayList<Island> AdjacentIslands = new ArrayList<Island>();
@@ -12,14 +14,6 @@ public class Island {
         this.Line = Line;
         this.Col = Col;
         this.BridgeNeeded = BridgeNeeded;
-        this.BridgeCount = 0;
-    }
-
-    public Island(Island isl) {
-        this.Line = isl.getLine();
-        this.Col = isl.getCol();
-        this.BridgeNeeded = isl.getBridgeNeeded();
-        this.BridgeCount = 0;
     }
 
     @Override
@@ -43,10 +37,6 @@ public class Island {
         return Col;
     }
 
-    public int getBridgeCount() {
-        return BridgeCount;
-    }
-
     public int getBridgeNeeded() {
         return BridgeNeeded;
     }
@@ -55,15 +45,9 @@ public class Island {
         AdjacentIslands.add(island);
     }
 
-    public boolean isComplete() {
-        return getBridgeNeeded() == getBridgeCount();
-    }
-
-    public void increaseBridgeCount() {
-        this.BridgeCount++;
+    public boolean isComplete(Graph<Island, DefaultEdge> g) {
+        return BridgeNeeded == g.degreeOf(this);
     }
 
     public ArrayList<Island> getAdjacentIslands() { return this.AdjacentIslands; }
-
-    public void decreaseBridgeCount() { this.BridgeCount--; }
 }

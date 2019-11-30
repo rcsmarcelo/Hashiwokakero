@@ -3,8 +3,13 @@
   <component name="ChangeListManager">
     <list default="true" id="af233ca5-46fb-45ca-bd7a-3d8cdd7f0573" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/DrawGraph.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/DrawGraph.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/GFG.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/GFG.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/GenAlg.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/GenAlg.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Instance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Instance.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Island.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Island.java" afterDir="false" />
     </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -41,6 +46,18 @@
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="reference.projectsettings.compiler.javacompiler" />
   </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
   <component name="RunManager">
     <configuration name="Instance" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Instance" />
@@ -54,18 +71,6 @@
         <item itemvalue="Application.Instance" />
       </list>
     </recent_temporary>
-  </component>
-  <component name="ServiceViewManager">
-    <option name="viewStates">
-      <list>
-        <serviceView>
-          <treeState>
-            <expand />
-            <select />
-          </treeState>
-        </serviceView>
-      </list>
-    </option>
   </component>
   <component name="SvnConfiguration">
     <configuration />
