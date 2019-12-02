@@ -95,21 +95,26 @@ public class GenAlg {
             Graph<Island, DefaultEdge> child = new Multigraph<>(DefaultEdge.class);
             Graph<Island, DefaultEdge> parent1 = Population.get(SelectedParents.get(c));
             Graph<Island, DefaultEdge> parent2 = Population.get(SelectedParents.get(c + 1));
+            DefaultEdge[] pe1 = parent1.edgeSet().toArray(new DefaultEdge[0]);
+            DefaultEdge[] pe2 = parent2.edgeSet().toArray(new DefaultEdge[0]);
+            int size;
+            if (pe1.length > pe2.length)
+                size = pe1.length;
+            else
+                size = pe2.length;
             for (Island i : parent1.vertexSet())
                 child.addVertex(i);
-            for (DefaultEdge bridge1 : parent1.edgeSet()) {
-                Island isl = parent1.getEdgeSource(bridge1);
-                Island isl2 = parent1.getEdgeTarget(bridge1);
-                if (!isl.isComplete(parent1) && !isl2.isComplete(parent1)) {
+            for (int aux = 0; aux < size; aux++) {
+                if (aux < parent1.edgeSet().size()) {
+                    Island isl = parent1.getEdgeSource(pe1[aux]);
+                    Island isl2 = parent1.getEdgeTarget(pe1[aux]);
                     if (isl.getLine() <= line && isl.getCol() <= col &&
                             isl2.getLine() <= line && isl2.getCol() <= col)
                         child.addEdge(isl, isl2, new DefaultEdge());
                 }
-            }
-            for (DefaultEdge bridge : parent2.edgeSet()) {
-                Island isl = parent2.getEdgeSource(bridge);
-                Island isl2 = parent2.getEdgeTarget(bridge);
-                if (!isl.isComplete(parent2) && isl2.isComplete(parent2)) {
+                if (aux < parent2.edgeSet().size()) {
+                    Island isl = parent2.getEdgeSource(pe2[aux]);
+                    Island isl2 = parent2.getEdgeTarget(pe2[aux]);
                     if ((isl.getLine() > line && isl.getCol() > col || isl.getCol() > col
                             || isl.getLine() > line) && (isl2.getLine() > line && isl2.getCol() > col
                             || isl2.getCol() > col || isl2.getLine() > line))
@@ -157,18 +162,10 @@ public class GenAlg {
     */
     private static void mutateOffspring(Graph<Island, DefaultEdge> child) {
         int probability = 10;
-        if (probability != ThreadLocalRandom.current().nextInt(0, 100)) return;
-        boolean aux = true;
-        for (Island isl : child.vertexSet()) {
-            for (Island isl2 : isl.getAdjacentIslands()) {
-                if (child.getAllEdges(isl, isl2).size() > 1) {
-                    child.removeEdge(isl, isl2);
-                    aux = false;
-                    break;
-                }
-            }
-            if (!aux) break;
-        }
+        //if (probability != ThreadLocalRandom.current().nextInt(0, 100)) return;
+        Collections.shuffle(Arrays.asList(child.edgeSet().toArray(new DefaultEdge[0])));
+        DefaultEdge random = child.edgeSet().toArray(new DefaultEdge[0])[0];
+        child.removeEdge(random);
         for (Island isl : child.vertexSet()) {
             if (isl.isComplete(child)) continue;
             for (Island isl2 : isl.getAdjacentIslands()) {

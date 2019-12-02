@@ -27,7 +27,7 @@ public class Instance {
     }
 
     private static void readInstance() throws IOException {
-        File file = new File("C:\\Users\\ramos\\Downloads\\Hashi_Puzzles\\100\\" + Filename);
+        File file = new File("C:\\Users\\marcelo.costasantos\\Downloads\\Hashi_Puzzles\\100\\" + Filename);
         BufferedReader br = new BufferedReader(new FileReader(file));
         HashiPuzzle = new Multigraph<>(DefaultEdge.class);
         String line, splitline[];
