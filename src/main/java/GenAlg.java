@@ -1,31 +1,26 @@
-import org.jgrapht.Graph;
+import org.jgrapht.*;
+import org.jgrapht.graph.*;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.Multigraph;
+import org.jgrapht.graph.MaskSubgraph;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class GenAlg {
-
-    private static ArrayList<ArrayList<ArrayList<Island>>> HashiMatrix;
     private static ArrayList<Graph<Island, DefaultEdge>> Population;
     private static ArrayList<Integer> SelectedParents = new ArrayList<>();
     private static int Dimension;
-    private static int STARTING_POPULATION;
 
-    public static void HGA(ArrayList<ArrayList<ArrayList<Island>>> matrix, ArrayList<Graph<Island,
-            DefaultEdge>> population, int dimension, int starting) {
-        HashiMatrix = matrix;
+    public static void HGA(ArrayList<Graph<Island, DefaultEdge>> population, int dimension, int starting) {
         Dimension = dimension;
         Population = population;
-        STARTING_POPULATION = starting;
         //initialize parents
-        for (int c = 0; c < STARTING_POPULATION; c++)
+        for (int c = 0; c < starting; c++)
             initializePopulation(c);
-        for (int c = 0; c < Dimension * 100; c++) {
+        new DrawGraph(Population.get(0));
+        for (int c = 0; c < Dimension * 50; c++) {
             selectParents();
             produceOffspring();
-            improveOffspring();
             selectSurvivors();
         }
         new DrawGraph(Collections.min(Population, (t1, t2) -> {
@@ -43,17 +38,18 @@ public class GenAlg {
 
     /*
     run through all vertices trying to complete each one
-    while also avoiding illegal edges
+    while also avoiding invalid edges
     */
     private static void initializePopulation(int index) {
-        Island[] vertexes = Population.get(index).vertexSet().toArray(new Island[0]);
-        for (Island isl : vertexes) {
-            if (isl.isComplete(Population.get(index))) continue;
+        Island[] vertices = Population.get(index).vertexSet().toArray(new Island[0]);
+        Collections.shuffle(Arrays.asList(vertices));
+        for (Island isl : vertices) {
+            Collections.shuffle(isl.getAdjacentIslands());
             for (Island adj : isl.getAdjacentIslands()) {
                 if (canAddEdge(adj, isl, Population.get(index)))
-                    Population.get(index).addEdge(isl, adj, new DefaultEdge());
+                    Population.get(index).addEdge(isl, adj);
                 if (canAddEdge(adj, isl, Population.get(index)))
-                    Population.get(index).addEdge(isl, adj, new DefaultEdge());
+                    Population.get(index).addEdge(isl, adj);
             }
         }
     }
@@ -88,37 +84,50 @@ public class GenAlg {
     belongs to a parent and the rest belongs to the other.
     After creation, mutation is attempted
     */
-    private static void produceOffspring() {
-        int line = ThreadLocalRandom.current().nextInt(0, Dimension -1);
-        int col = ThreadLocalRandom.current().nextInt(0, Dimension - 1);
+    public static void produceOffspring() {
+        int line = ThreadLocalRandom.current().nextInt(4, Dimension - 5);
+        int col = ThreadLocalRandom.current().nextInt(4, Dimension - 5);
         for (int c = 0; c + 1 < SelectedParents.size(); c+=2) {
             Graph<Island, DefaultEdge> child = new Multigraph<>(DefaultEdge.class);
             Graph<Island, DefaultEdge> parent1 = Population.get(SelectedParents.get(c));
             Graph<Island, DefaultEdge> parent2 = Population.get(SelectedParents.get(c + 1));
             DefaultEdge[] pe1 = parent1.edgeSet().toArray(new DefaultEdge[0]);
             DefaultEdge[] pe2 = parent2.edgeSet().toArray(new DefaultEdge[0]);
-            int size;
-            if (pe1.length > pe2.length)
-                size = pe1.length;
-            else
-                size = pe2.length;
-            for (Island i : parent1.vertexSet())
-                child.addVertex(i);
+            Island[] vp1 = parent1.vertexSet().toArray(new Island[0]);
+            int size = Math.max(pe1.length, pe2.length);
+            size = Math.max(size, parent1.vertexSet().size());
             for (int aux = 0; aux < size; aux++) {
+                if(aux < vp1.length) {
+                    if (!child.containsVertex(vp1[aux]))
+                        child.addVertex(new Island(vp1[aux].getLine(), vp1[aux].getCol(),
+                                vp1[aux].getBridgeNeeded()));
+                }
                 if (aux < parent1.edgeSet().size()) {
                     Island isl = parent1.getEdgeSource(pe1[aux]);
                     Island isl2 = parent1.getEdgeTarget(pe1[aux]);
+                    Island ch1 = new Island(isl.getLine(), isl.getCol(), isl.getBridgeNeeded());
+                    Island ch2 = new Island(isl2.getLine(), isl2.getCol(), isl2.getBridgeNeeded());
+                    if (!child.containsVertex(ch1))
+                        child.addVertex(ch1);
+                    if (!child.containsVertex(ch2))
+                        child.addVertex(ch2);
                     if (isl.getLine() <= line && isl.getCol() <= col &&
                             isl2.getLine() <= line && isl2.getCol() <= col)
-                        child.addEdge(isl, isl2, new DefaultEdge());
+                        child.addEdge(ch1, ch2);
                 }
                 if (aux < parent2.edgeSet().size()) {
-                    Island isl = parent2.getEdgeSource(pe2[aux]);
+                    Island isl =  parent2.getEdgeSource(pe2[aux]);
                     Island isl2 = parent2.getEdgeTarget(pe2[aux]);
+                    Island ch1 = new Island(isl.getLine(), isl.getCol(), isl.getBridgeNeeded());
+                    Island ch2 = new Island(isl2.getLine(), isl2.getCol(), isl2.getBridgeNeeded());
+                    if (!child.containsVertex(ch1))
+                        child.addVertex(ch1);
+                    if (!child.containsVertex(ch2))
+                        child.addVertex(ch2);
                     if ((isl.getLine() > line && isl.getCol() > col || isl.getCol() > col
                             || isl.getLine() > line) && (isl2.getLine() > line && isl2.getCol() > col
                             || isl2.getCol() > col || isl2.getLine() > line))
-                        child.addEdge(isl, isl2, new DefaultEdge());
+                        child.addEdge(ch1, ch2);
                 }
             }
             //attempt to connect the disjointed sub-graphs
@@ -134,7 +143,8 @@ public class GenAlg {
                     }
                 }
             }*/
-            mutateOffspring(child);
+            //mutateOffspring(child);
+            improveOffspring(child);
             Population.add(child);
         }
         SelectedParents.removeAll(SelectedParents);
@@ -145,6 +155,7 @@ public class GenAlg {
     */
     private static boolean canAddEdge(Island p1, Island p2, Graph<Island, DefaultEdge> puzzle) {
         if (p1.isComplete(puzzle) || p2.isComplete(puzzle)) return false;
+        if (puzzle.getAllEdges(p1, p2).size() == 2) return false;
         for (DefaultEdge bridge : puzzle.edgeSet()) {
             Island p3 = puzzle.getEdgeSource(bridge);
             Island p4 = puzzle.getEdgeTarget(bridge);
@@ -161,22 +172,33 @@ public class GenAlg {
     Mutates child with a 10% chance
     */
     private static void mutateOffspring(Graph<Island, DefaultEdge> child) {
-        int probability = 10;
-        //if (probability != ThreadLocalRandom.current().nextInt(0, 100)) return;
-        Collections.shuffle(Arrays.asList(child.edgeSet().toArray(new DefaultEdge[0])));
-        DefaultEdge random = child.edgeSet().toArray(new DefaultEdge[0])[0];
+        int probability = 20;
+        if (probability != ThreadLocalRandom.current().nextInt(0, 100)) return;
+        int pos = ThreadLocalRandom.current().nextInt(0, child.edgeSet().size() - 1);
+        DefaultEdge random = child.edgeSet().toArray(new DefaultEdge[0])[pos];
         child.removeEdge(random);
+        Collections.shuffle(Arrays.asList(child.vertexSet().toArray(new Island[0])));
         for (Island isl : child.vertexSet()) {
             if (isl.isComplete(child)) continue;
             for (Island isl2 : isl.getAdjacentIslands()) {
                 if (isl2.isComplete(child)) continue;
                 if (canAddEdge(isl, isl2, child))
-                    child.addEdge(isl, isl2, new DefaultEdge());
+                    child.addEdge(isl, isl2);
             }
         }
     }
 
-    private static void improveOffspring() {}
+    private static void improveOffspring(Graph<Island, DefaultEdge> child) {
+        int counter = 0;
+        while (counter < 50) {
+            int a = evaluateCandidate(child);
+            mutateOffspring(child);
+            int b = evaluateCandidate(child);
+            if (b < a)
+                return;
+            counter++;
+        }
+    }
 
     private static void selectSurvivors() {
         Population.sort((t1, t2) -> {

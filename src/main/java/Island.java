@@ -8,9 +8,9 @@ public class Island {
     private int Col;
     private int BridgeNeeded;
 
-    public ArrayList<Island> AdjacentIslands = new ArrayList<Island>();
+    private ArrayList<Island> AdjacentIslands = new ArrayList<>();
 
-    public Island(int Line, int Col, int BridgeNeeded) {
+    Island(int Line, int Col, int BridgeNeeded) {
         this.Line = Line;
         this.Col = Col;
         this.BridgeNeeded = BridgeNeeded;
@@ -26,28 +26,28 @@ public class Island {
 
     @Override
     public int hashCode() {
-        return 31 * (Integer.toString(this.getLine()) + Integer.toString(this.getCol())).hashCode();
+        return 31 * (this.getLine() + Integer.toString(this.getCol())).hashCode();
     }
 
-    public int getLine() {
+    int getLine() {
         return Line;
     }
 
-    public int getCol() {
+    int getCol() {
         return Col;
     }
 
-    public int getBridgeNeeded() {
+    int getBridgeNeeded() {
         return BridgeNeeded;
     }
 
-    public void addAdjacentIsland(Island island) {
+    void addAdjacentIsland(Island island) {
         AdjacentIslands.add(island);
     }
 
-    public boolean isComplete(Graph<Island, DefaultEdge> g) {
+    boolean isComplete(Graph<Island, DefaultEdge> g) {
         return BridgeNeeded == g.degreeOf(this);
     }
 
-    public ArrayList<Island> getAdjacentIslands() { return this.AdjacentIslands; }
+    ArrayList<Island> getAdjacentIslands() { return this.AdjacentIslands; }
 }

@@ -28,10 +28,16 @@ public class DrawGraph extends JPanel {
         int shift = 40;
         DefaultEdge[] edges = Puzzle.edgeSet().toArray(new DefaultEdge[0]);
         ArrayList<DefaultEdge> visited = new ArrayList<>();
-        for (Island v : Puzzle.vertexSet())
+        for (Island v : Puzzle.vertexSet()) {
+            if (!v.isComplete(Puzzle))
+                g2d.setColor(Color.red);
+            else
+                g2d.setColor(Color.black);
             g2d.fillOval((v.getCol() * 30 - 5) + shift, (v.getLine() * 30 - 5) + shift, 10, 10);
+        }
+        g2d.setColor(Color.black);
         for (int c = 0; c < edges.length; c++) {
-            if (visited.contains(edges[c]));
+            if (visited.contains(edges[c])) continue;
             Island p1 = Puzzle.getEdgeSource(edges[c]);
             Island p2 = Puzzle.getEdgeTarget(edges[c]);
             visited.add(edges[c]);
