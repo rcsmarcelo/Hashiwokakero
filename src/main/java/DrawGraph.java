@@ -34,6 +34,8 @@ public class DrawGraph extends JPanel {
             else
                 g2d.setColor(Color.black);
             g2d.fillOval((v.getCol() * 30 - 5) + shift, (v.getLine() * 30 - 5) + shift, 10, 10);
+            g2d.drawString(Integer.toString(v.getBridgeNeeded()), v.getCol() * 30 + 5 + shift,
+                    v.getLine() * 30 - 5 + shift);
         }
         g2d.setColor(Color.black);
         for (int c = 0; c < edges.length; c++) {

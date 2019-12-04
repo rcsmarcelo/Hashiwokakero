@@ -63,7 +63,7 @@ public class Instance {
                         curr.addAdjacentIsland(add);
                         break;
                     }
-                for (int col1 = col - 1; col1 > 0; col1--)
+                for (int col1 = col - 1; col1 >= 0; col1--)
                     if (HashiMatrix.get(HashiMatrix.size() - 1).get(line).get(col1).getBridgeNeeded() != 0) {
                         Island add = HashiMatrix.get(HashiMatrix.size() - 1).get(line).get(col1);
                         curr.addAdjacentIsland(add);
@@ -75,7 +75,7 @@ public class Instance {
                         curr.addAdjacentIsland(add);
                         break;
                     }
-                for (int line1 = line - 1; line1 > 0; line1--)
+                for (int line1 = line - 1; line1 >= 0; line1--)
                     if (HashiMatrix.get(HashiMatrix.size() - 1).get(line1).get(col).getBridgeNeeded() != 0) {
                         Island add = HashiMatrix.get(HashiMatrix.size() - 1).get(line1).get(col);
                         curr.addAdjacentIsland(add);

@@ -16,6 +16,13 @@ public class Island {
         this.BridgeNeeded = BridgeNeeded;
     }
 
+    Island(int Line, int Col, int BridgeNeeded, ArrayList<Island> adj) {
+        this.Line = Line;
+        this.Col = Col;
+        this.BridgeNeeded = BridgeNeeded;
+        this.AdjacentIslands = adj;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) return false;
