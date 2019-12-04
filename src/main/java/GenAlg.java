@@ -18,7 +18,7 @@ public class GenAlg {
         for (int c = 0; c < starting; c++)
             initializePopulation(c);
         new DrawGraph(Population.get(0));
-        for (int c = 0; c < Dimension * 50; c++) {
+        for (int c = 0; c < Dimension * 100; c++) {
             selectParents();
             produceOffspring();
             selectSurvivors();
@@ -233,6 +233,7 @@ public class GenAlg {
     }
 
     private static boolean canAddEdge2(Island p1, Island p2, Graph<Island, DefaultEdge> puzzle) {
+        if (puzzle.getAllEdges(p1, p2).size() == 2) return false;
         for (DefaultEdge bridge : puzzle.edgeSet()) {
             Island p3 = puzzle.getEdgeSource(bridge);
             Island p4 = puzzle.getEdgeTarget(bridge);
@@ -269,7 +270,7 @@ public class GenAlg {
 
     private static void improveOffspring(Graph<Island, DefaultEdge> child) {
         Collections.shuffle(Arrays.asList(child.vertexSet().toArray(new Island[0])));
-        for (int c = 0; c < 10; c++) {
+        for (int c = 0; c < 50; c++) {
             Island start = null;
             for (Island isl : child.vertexSet()) {
                 if (!isl.isComplete(child))
