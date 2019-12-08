@@ -11,24 +11,17 @@ public class GenAlg {
     private static ArrayList<Integer> SelectedParents = new ArrayList<>();
     private static int Dimension;
 
-    public static void HGA(ArrayList<Graph<Island, DefaultEdge>> population, int dimension, int starting) {
+    public static void HGA(ArrayList<Graph<Island, DefaultEdge>> population, int dimension, int starting) throws InterruptedException {
         Dimension = dimension;
         Population = population;
         //initialize parents
         for (int c = 0; c < starting; c++)
             initializePopulation(c);
-        new DrawGraph(Population.get(0));
         StopWatch watch = new StopWatch();
         watch.start();
         for (int c = 0; c < Dimension * 10; c++) {
-            System.out.printf("\nGeneration %d,", c);
-            int best =  evaluateCandidate(Population.get(0));
-            int worst =  evaluateCandidate(Population.get(Population.size() - 1));
-            System.out.printf("%d,", best);
-            System.out.printf("%d,", worst);
-            System.out.printf("%d,", watch.getTime() / 1000);
-            /*if (best == 0)
-                break;*/
+            if (evaluateCandidate(Population.get(0)) == 0)
+                break;
             selectParents();
             produceOffspring();
             selectSurvivors();
@@ -168,10 +161,10 @@ public class GenAlg {
     belongs to a parent and the rest belongs to the other.
     After creation, mutation is attempted and local search is performed
     */
-    public static void produceOffspring() {
-        int line = ThreadLocalRandom.current().nextInt(4, Dimension - 5);
-        int col = ThreadLocalRandom.current().nextInt(4, Dimension - 5);
+    public static void produceOffspring() throws InterruptedException {
         for (int c = 0; c + 1 < SelectedParents.size(); c+=2) {
+            int line = ThreadLocalRandom.current().nextInt(4, Dimension - 5);
+            int col = ThreadLocalRandom.current().nextInt(4, Dimension - 5);
             Graph<Island, DefaultEdge> child = new Multigraph<>(DefaultEdge.class);
             Graph<Island, DefaultEdge> parent1 = Population.get(SelectedParents.get(c));
             Graph<Island, DefaultEdge> parent2 = Population.get(SelectedParents.get(c + 1));
@@ -198,9 +191,11 @@ public class GenAlg {
                         child.addVertex(ch1);
                     if (!child.containsVertex(ch2))
                         child.addVertex(ch2);
-                    if (isl.getLine() <= line && isl.getCol() <= col &&
-                            isl2.getLine() <= line && isl2.getCol() <= col)
+                    if ((isl.getLine() <= line && isl.getCol() <= col) &&
+                            (isl2.getLine() <= line && isl2.getCol() <= col)
+                    )
                         child.addEdge(ch1, ch2);
+
                 }
                 if (aux < parent2.edgeSet().size()) {
                     Island isl =  parent2.getEdgeSource(pe2[aux]);
@@ -219,13 +214,6 @@ public class GenAlg {
                         child.addEdge(ch1, ch2);
                 }
             }
-            /*for (Island isl : child.vertexSet())
-                    for (Island adj : isl.getAdjacentIslands()) {
-                        if (canAddEdge(adj, isl, child))
-                            child.addEdge(adj, isl);
-                        if (canAddEdge(adj, isl, child))
-                            child.addEdge(adj, isl);
-                    }*/
             mutateOffspring(child);
             improveOffspring(child);
             Population.add(child);
