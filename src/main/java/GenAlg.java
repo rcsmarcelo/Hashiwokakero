@@ -21,6 +21,14 @@ public class GenAlg {
         StopWatch watch = new StopWatch();
         watch.start();
         for (int c = 0; c < Dimension * 10; c++) {
+            System.out.printf("\nGeneration %d,", c);
+            int best =  evaluateCandidate(Population.get(0));
+            int worst =  evaluateCandidate(Population.get(Population.size() - 1));
+            System.out.printf("%d,", best);
+            System.out.printf("%d,", worst);
+            System.out.printf("%d,", watch.getTime() / 1000);
+            /*if (best == 0)
+                break;*/
             selectParents();
             produceOffspring();
             selectSurvivors();
@@ -36,8 +44,6 @@ public class GenAlg {
                 return 1;
             else return 0;
         }));
-        for (Graph<Island, DefaultEdge> g : Population)
-           System.out.println(evaluateCandidate(g));
     }
 
     private static ArrayList<Island> BFS(Graph<Island, DefaultEdge> child, Island v) {
@@ -46,12 +52,11 @@ public class GenAlg {
         ArrayList<Island> path = new ArrayList<>();
         Queue<Island> queue = new ArrayDeque<>();
         boolean isAdd = true;
-        Island begin = new Island(v.getLine(), v.getCol(), v.getBridgeNeeded());
         queue.add(v);
         path.add(v);
         while (!queue.isEmpty()) {
             v = queue.poll();
-            if (!v.isComplete(child) && !isAdd && !v.equals(begin)) {
+            if (!v.isComplete(child) && !isAdd) {
                 path.add(v);
                 return path;
             }
@@ -119,7 +124,6 @@ public class GenAlg {
             }
         }
 
-        //reconnect solution
         Collections.shuffle(Arrays.asList(vertices));
         for (Island isl : vertices) {
             Collections.shuffle(isl.getAdjacentIslands());
@@ -141,7 +145,7 @@ public class GenAlg {
             if (!isl.isComplete(g))
                 fitness++;
         if(!GraphTests.isConnected(g))
-            fitness+=5;
+            fitness+=15;
         return fitness;
     }
 
@@ -176,6 +180,7 @@ public class GenAlg {
             Island[] vp1 = parent1.vertexSet().toArray(new Island[0]);
             int size = Math.max(pe1.length, pe2.length);
             size = Math.max(size, parent1.vertexSet().size());
+            //run through parents adding vertices and edges to child
             for (int aux = 0; aux < size; aux++) {
                 if(aux < vp1.length) {
                     if (!child.containsVertex(vp1[aux]))
@@ -214,13 +219,13 @@ public class GenAlg {
                         child.addEdge(ch1, ch2);
                 }
             }
-            for (Island isl : child.vertexSet())
+            /*for (Island isl : child.vertexSet())
                     for (Island adj : isl.getAdjacentIslands()) {
                         if (canAddEdge(adj, isl, child))
                             child.addEdge(adj, isl);
                         if (canAddEdge(adj, isl, child))
                             child.addEdge(adj, isl);
-                    }
+                    }*/
             mutateOffspring(child);
             improveOffspring(child);
             Population.add(child);
@@ -261,29 +266,43 @@ public class GenAlg {
     }
 
     /*
-    Removes all bridges from an island with a 25% chance
+    Removes all bridges from an incomplete island and its neighbors with a 10% chance
     */
     private static void mutateOffspring(Graph<Island, DefaultEdge> child) {
-        if (new Random().nextInt(50) != 0) return;
-        DefaultEdge[] aux = null;
-        for (Island isl : child.vertexSet()) {
-            if (isl.getBridgeNeeded() == 8 || isl.getBridgeNeeded() == 7) continue;
-            aux = child.edgesOf(isl).toArray(new DefaultEdge[0]);
-            break;
+        if (new Random().nextInt(100) > 20) return;
+        ArrayList<DefaultEdge> edges = new ArrayList<>();
+        Island isl;
+        int counter = 0;
+        //find incomplete island
+        do {
+            int pos = ThreadLocalRandom.current().nextInt(0, child.vertexSet().size() - 1);
+            isl = child.vertexSet().toArray(new Island[0])[pos];
+            counter++;
+            if (counter >= child.vertexSet().size())
+                return;
+        } while (isl.getBridgeNeeded() != 8 && isl.getBridgeNeeded() != 7 && isl.isComplete(child));
+        edges.addAll(child.edgesOf(isl));
+        //find neighbors' edges
+        for (Island adj : isl.getAdjacentIslands()) {
+            if (adj.getBridgeNeeded() == 8|| adj.getBridgeNeeded() == 7) continue;
+            edges.addAll(child.getAllEdges(adj, isl));
         }
-        child.removeAllEdges(Arrays.asList(aux));
+        //remove everything
+        child.removeAllEdges(edges);
     }
 
     private static void improveOffspring(Graph<Island, DefaultEdge> child) {
-        Collections.shuffle(Arrays.asList(child.vertexSet().toArray(new Island[0])));
         int size = evaluateCandidate(child);
         for (int c = 0; c < size; c++) {
-            Collections.shuffle(Arrays.asList(child.vertexSet().toArray(new Island[0])));
-            Island start = null;
-            for (Island isl : child.vertexSet()) {
-                if (!isl.isComplete(child))
-                    start = isl;
-            }
+            Island start;
+            int counter = 0;
+            do {
+                int pos = ThreadLocalRandom.current().nextInt(0, child.vertexSet().size() - 1);
+                start = child.vertexSet().toArray(new Island[0])[pos];
+                if (counter >= child.vertexSet().size())
+                    return;
+                counter++;
+            } while (start.isComplete(child));
             if (start == null)
                 return;
             ArrayList<Island> path = BFS(child, start);

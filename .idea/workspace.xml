@@ -2,11 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="af233ca5-46fb-45ca-bd7a-3d8cdd7f0573" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_commons_commons_lang3_3_7.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Hashiwokakero.iml" beforeDir="false" afterPath="$PROJECT_DIR$/Hashiwokakero.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/DrawGraph.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/DrawGraph.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/GenAlg.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/GenAlg.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Instance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Instance.java" afterDir="false" />
     </list>

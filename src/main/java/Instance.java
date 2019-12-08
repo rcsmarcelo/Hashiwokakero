@@ -24,8 +24,8 @@ public class Instance {
     }
 
     private static void readInstance() throws IOException {
-        String filename = "Hs_34_400_25_00_010.has";
-        File file = new File("C:\\Users\\ramos\\Downloads\\Hashi_Puzzles\\400\\" + filename);
+        String filename = "Hs_24_200_25_05_028.has";
+        File file = new File("C:\\Users\\tchel\\Downloads\\Hashi_Puzzles\\200\\" + filename);
         BufferedReader br = new BufferedReader(new FileReader(file));
         Graph<Island, DefaultEdge> hashiPuzzle = new Multigraph<>(DefaultEdge.class);
         String line;
