@@ -1,7 +1,7 @@
+import org.apache.commons.lang3.time.StopWatch;
 import org.jgrapht.*;
 import org.jgrapht.graph.*;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.MaskSubgraph;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -18,11 +18,15 @@ public class GenAlg {
         for (int c = 0; c < starting; c++)
             initializePopulation(c);
         new DrawGraph(Population.get(0));
-        for (int c = 0; c < Dimension * 100; c++) {
+        StopWatch watch = new StopWatch();
+        watch.start();
+        for (int c = 0; c < Dimension * 10; c++) {
             selectParents();
             produceOffspring();
             selectSurvivors();
         }
+        watch.stop();
+        System.out.println("Duration: " + watch.getTime() / 1000 + "s");
         new DrawGraph(Collections.min(Population, (t1, t2) -> {
             int value1 = evaluateCandidate(t1);
             int value2 = evaluateCandidate(t2);
@@ -47,17 +51,18 @@ public class GenAlg {
         path.add(v);
         while (!queue.isEmpty()) {
             v = queue.poll();
-            if (!v.isComplete(child) && !isAdd && !v.equals(begin))
+            if (!v.isComplete(child) && !isAdd && !v.equals(begin)) {
+                path.add(v);
                 return path;
+            }
             if (isAdd) {
                 discoveredAdd.put(v, true);
                 for (Island u : v.getAdjacentIslands()) {
-                    if (!discoveredRm.containsKey(u))
-                        discoveredRm.put(u, false);
-                    if (!discoveredRm.get(u) && child.getAllEdges(v, u).size() <= 1
+                    if (!discoveredAdd.containsKey(u))
+                        discoveredAdd.put(u, false);
+                    if (!discoveredAdd.get(u) && child.getAllEdges(v, u).size() <= 1
                             && canAddEdge2(u, v, child)) {
-                        //System.out.printf("To add: %d,%d - %d, %d\n", v.getLine(), v.getCol(), u.getLine(), u.getCol());
-                        discoveredRm.put(u, true);
+                        discoveredAdd.put(u, true);
                         queue.add(u);
                         path.add(u);
                         isAdd = false;
@@ -68,11 +73,10 @@ public class GenAlg {
             else {
                 discoveredRm.put(v, true);
                 for (Island u : v.getAdjacentIslands()) {
-                    if (!discoveredAdd.containsKey(u))
-                        discoveredAdd.put(u, false);
-                    if (!discoveredAdd.get(u) && child.getAllEdges(v, u).size() > 0) {
-                        //System.out.printf("To Rm: %d,%d - %d, %d\n", v.getLine(), v.getCol(), u.getLine(), u.getCol());
-                        discoveredAdd.put(u, true);
+                    if (!discoveredRm.containsKey(u))
+                        discoveredRm.put(u, false);
+                    if (!discoveredRm.get(u) && child.getAllEdges(v, u).size() > 0) {
+                        discoveredRm.put(u, true);
                         queue.add(u);
                         path.add(u);
                         isAdd = true;
@@ -81,7 +85,7 @@ public class GenAlg {
                 }
             }
         }
-        return path;
+        return new ArrayList<>();
     }
 
     /*
@@ -115,6 +119,7 @@ public class GenAlg {
             }
         }
 
+        //reconnect solution
         Collections.shuffle(Arrays.asList(vertices));
         for (Island isl : vertices) {
             Collections.shuffle(isl.getAdjacentIslands());
@@ -135,14 +140,16 @@ public class GenAlg {
         for (Island isl : g.vertexSet())
             if (!isl.isComplete(g))
                 fitness++;
+        if(!GraphTests.isConnected(g))
+            fitness+=5;
         return fitness;
     }
 
     /*
-    10 x k binary tournament, where k = 2
+    50 x k binary tournament, where k = 2
     */
     private static void selectParents() {
-        for (int c = 0; c < 10; c++) {
+        for (int c = 0; c < 50; c++) {
             int pos = ThreadLocalRandom.current().nextInt(0, Population.size() - 1);
             int pos2 = ThreadLocalRandom.current().nextInt(0, Population.size() - 1);
             if (evaluateCandidate(Population.get(pos)) > evaluateCandidate(Population.get(pos2)))
@@ -155,7 +162,7 @@ public class GenAlg {
     /*
     Creates children where the top left corner of the puzzle
     belongs to a parent and the rest belongs to the other.
-    After creation, mutation is attempted
+    After creation, mutation is attempted and local search is performed
     */
     public static void produceOffspring() {
         int line = ThreadLocalRandom.current().nextInt(4, Dimension - 5);
@@ -207,6 +214,13 @@ public class GenAlg {
                         child.addEdge(ch1, ch2);
                 }
             }
+            for (Island isl : child.vertexSet())
+                    for (Island adj : isl.getAdjacentIslands()) {
+                        if (canAddEdge(adj, isl, child))
+                            child.addEdge(adj, isl);
+                        if (canAddEdge(adj, isl, child))
+                            child.addEdge(adj, isl);
+                    }
             mutateOffspring(child);
             improveOffspring(child);
             Population.add(child);
@@ -247,30 +261,24 @@ public class GenAlg {
     }
 
     /*
-    Mutates child with a 10% chance
+    Removes all bridges from an island with a 25% chance
     */
     private static void mutateOffspring(Graph<Island, DefaultEdge> child) {
-        int probability = 20;
-        int rand = ThreadLocalRandom.current().nextInt(0, 100);
-        if (probability != rand) return;
+        if (new Random().nextInt(50) != 0) return;
+        DefaultEdge[] aux = null;
         for (Island isl : child.vertexSet()) {
-            for (Island adj : isl.getAdjacentIslands()) {
-                if (child.getAllEdges(isl, adj).size() == 2)
-                    child.removeEdge(isl, adj);
-            }
+            if (isl.getBridgeNeeded() == 8 || isl.getBridgeNeeded() == 7) continue;
+            aux = child.edgesOf(isl).toArray(new DefaultEdge[0]);
+            break;
         }
-        for (Island isl : child.vertexSet()) {
-            if (isl.isComplete(child)) continue;
-            for (Island adj : isl.getAdjacentIslands()) {
-                if (adj.isComplete(child)) continue;
-                child.addEdge(isl, adj);
-            }
-        }
+        child.removeAllEdges(Arrays.asList(aux));
     }
 
     private static void improveOffspring(Graph<Island, DefaultEdge> child) {
         Collections.shuffle(Arrays.asList(child.vertexSet().toArray(new Island[0])));
-        for (int c = 0; c < 50; c++) {
+        int size = evaluateCandidate(child);
+        for (int c = 0; c < size; c++) {
+            Collections.shuffle(Arrays.asList(child.vertexSet().toArray(new Island[0])));
             Island start = null;
             for (Island isl : child.vertexSet()) {
                 if (!isl.isComplete(child))
@@ -279,9 +287,9 @@ public class GenAlg {
             if (start == null)
                 return;
             ArrayList<Island> path = BFS(child, start);
-            for (int d = 0; d + 1< path.size(); d++) {
+            for (int d = 0; d + 1 < path.size(); d++) {
                 if (d % 2 == 0)
-                    child.addEdge(path.get(d), path.get(d +1));
+                    child.addEdge(path.get(d), path.get(d + 1));
                 else
                     child.removeEdge(path.get(d), path.get(d + 1));
             }
@@ -298,7 +306,7 @@ public class GenAlg {
                 return 1;
             else return 0;
         });
-        for (int c = 50; c < Population.size(); c++)
+        for (int c = 100; c < Population.size(); c++)
             Population.remove(c);
     }
 }
